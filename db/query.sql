@@ -1,5 +1,3 @@
 SELECT 
 FROM employee
-LEFT JOIN 
-ON 
 ORDER BY 

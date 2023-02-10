@@ -1,14 +1,13 @@
 const inquirer = require("inquirer") 
-// Import and require mysql2
-const mysql = require('mysql2');
+const mysql = require('mysql2')
+// const app = express()
 const {printTable} = require("console-table-printer")
-// Connect to database
+// app.use(express.json())
 const db = mysql.createConnection(
   {
     host: 'localhost',
-    // MySQL username,
     user: 'root',
-    // TODO: Add MySQL password here
+  
     password: 'Class@121',
     database: 'employee_db'
   },
@@ -60,7 +59,7 @@ function menu() {
 }
 
 function addEmployee() {
-  db.query("select title as name,id as value from role",function(err,data){
+  db.query("select title as name,id as value from role",function(err,rows){
    db.query("select concat(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
 
     inquirer.prompt([{
@@ -93,7 +92,7 @@ function addEmployee() {
 
 
 function addRole() {
-  db.query("select name, id as value from department", function(err,data){
+  db.query("select name, id as value from department", function(err,rows){
 
  
   inquirer.prompt([{
@@ -130,23 +129,22 @@ function addDepartment() {
 }
 
 function viewEmployees() {
-  db.query("select * from employee", function(err,data){
-    printTable(data)
+  db.query("select * from employee", function(err,rows){
+    printTable(rows)
     menu()
   })
 }
 
 function viewRoles() {
-  db.query("select * from role", function(err, data){
-    printTable(data)
+  db.query("select * from role", function(err, rows){
+    printTable(rows)
     menu()
   })
 }
 
-function viewDepartment() {
-  console.log("view department")
-      db.query("select * from department", function(err,data){
-        printTable(data)
+function viewDepartment() {  
+      db.query("select * from department", function(err,rows){
+        printTable(rows)
         menu()
       })
 }

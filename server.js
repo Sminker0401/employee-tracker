@@ -1,14 +1,7 @@
-const express = require('express');
+const inquirer = require("inquirer") 
 // Import and require mysql2
 const mysql = require('mysql2');
-
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
+const {printTable} = require("console-table-printer")
 // Connect to database
 const db = mysql.createConnection(
   {
@@ -16,110 +9,144 @@ const db = mysql.createConnection(
     // MySQL username,
     user: 'root',
     // TODO: Add MySQL password here
-    password: '',
-    database: 'movies_db'
+    password: 'Class@121',
+    database: 'employee_db'
   },
-  console.log(`Connected to the movies_db database.`)
+  console.log(`Connected to the employee_db database.`)
 );
 
-// Create a movie
-app.post('/api/new-movie', ({ body }, res) => {
-  const sql = `INSERT INTO movies (movie_name)
-    VALUES (?)`;
-  const params = [body.movie_name];
+db.connect(function(){
+  menu()
+})
+
+function menu() {
+  inquirer.prompt([{
+    type:"list",
+    message:"Please choose one option",
+    name:"option",
+    choices:["view departments", 
+            "view roles",
+            "view employees",
+            "add a department",
+            "add a role",
+            "add an employee",
+            "update an employee"
+  ]
+
+  }])
+.then(response =>{
+  if(response.option==="view departments") {
+    viewDepartment()
+  }
+  else if(response.option==="view roles") {
+    viewRoles()
+  }
+  else if(response.option==="view employees") {
+    viewEmployees()
+  }
+  else if(response.option==="add a department") {
+    addDepartment()
+  }
+  else if(response.option==="add a role") {
+    addRole()
+  }
+  else if(response.option==="add an employee") {
+    addEmployee()
+  }
+  else if(response.option==="update an employee") {
+    updateEmployee()
+  }
+})
+}
+
+function addEmployee() {
+  db.query("select title as name,id as value from role",function(err,data){
+   db.query("select concat(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
+
+    inquirer.prompt([{
+      type: 'input',
+      name: 'first_name',
+      message: 'first name'
+    },{
+      type: 'input',
+      name: 'last_name',
+      message: 'last name'
+    },{
+      type: 'list',
+      name: 'role',
+      choices: data,
+      message: "select role"
+    },{
+      type: 'list',
+      name: 'employee',
+      choices: employeeData,
+      message: "select manager"
+    }]).then(function(response){
+      db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)",[response.first_name,response.last_name,response.role,response.employee], function (err){
+        viewEmployees()
+      })
+    })
+   }) 
   
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: body
-    });
-  });
-});
+  })
+}
 
-// Read all movies
-app.get('/api/movies', (req, res) => {
-  const sql = `SELECT id, movie_name AS title FROM movies`;
-  
-  db.query(sql, (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-       return;
-    }
-    res.json({
-      message: 'success',
-      data: rows
-    });
-  });
-});
 
-// Delete a movie
-app.delete('/api/movie/:id', (req, res) => {
-  const sql = `DELETE FROM movies WHERE id = ?`;
-  const params = [req.params.id];
-  
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.statusMessage(400).json({ error: res.message });
-    } else if (!result.affectedRows) {
-      res.json({
-      message: 'Movie not found'
-      });
-    } else {
-      res.json({
-        message: 'deleted',
-        changes: result.affectedRows,
-        id: req.params.id
-      });
-    }
-  });
-});
+function addRole() {
+  db.query("select name, id as value from department", function(err,data){
 
-// Read list of all reviews and associated movie name using LEFT JOIN
-app.get('/api/movie-reviews', (req, res) => {
-  const sql = `SELECT movies.movie_name AS movie, reviews.review FROM reviews LEFT JOIN movies ON reviews.movie_id = movies.id ORDER BY movies.movie_name;`;
-  db.query(sql, (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: rows
-    });
-  });
-});
+ 
+  inquirer.prompt([{
+    type: 'input',
+    name: 'role',
+    message: 'add the role you want to create'
+  },{
+    type: 'input',
+    name: 'salary',
+    message: 'enter the salary'
+  },{
+    type: 'list',
+    name: 'department',
+    choices: data,
+    message: "choose the role department"
+  }]).then(function(response){
+    db.query("INSERT INTO role (title,salary,department_id) VALUES(?,?,?)",[response.role,response.salary,response.department],function(err){
+      viewRoles()
+    })
+  })
+})
+}
 
-// BONUS: Update review name
-app.put('/api/review/:id', (req, res) => {
-  const sql = `UPDATE reviews SET review = ? WHERE id = ?`;
-  const params = [req.body.review, req.params.id];
+function addDepartment() {
+  inquirer.prompt([{
+    type: 'input',
+    name: 'department',
+    message: 'add the name of the department you want to add'
+  }]).then(function(response){
+    db.query("INSERT INTO department (name) VALUES(?)",[response.department],function(err){
+      viewDepartment()
+        })
+  })
+}
 
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-    } else if (!result.affectedRows) {
-      res.json({
-        message: 'Movie not found'
-      });
-    } else {
-      res.json({
-        message: 'success',
-        data: req.body,
-        changes: result.affectedRows
-      });
-    }
-  });
-});
+function viewEmployees() {
+  db.query("select * from employee", function(err,data){
+    printTable(data)
+    menu()
+  })
+}
 
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-  res.status(404).end();
-});
+function viewRoles() {
+  db.query("select * from role", function(err, data){
+    printTable(data)
+    menu()
+  })
+}
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function viewDepartment() {
+  console.log("view department")
+      db.query("select * from department", function(err,data){
+        printTable(data)
+        menu()
+      })
+}

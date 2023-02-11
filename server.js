@@ -59,8 +59,8 @@ function menu() {
 }
 
 function addEmployee() {
-  db.query("select title as name,id as value from role",function(err, data){
-   db.query("select contact(first_name,' ',last_name) as name, id as value from employee", function(err, employeedata){
+  db.query("select title as name,id as value from role", function(err, data){
+  db.query("select concat(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
 
     inquirer.prompt([{
       type: 'input',
@@ -78,7 +78,7 @@ function addEmployee() {
     },{
       type: 'list',
       name: 'employee',
-      choices: employeedata,
+      choices: employeeData,
       message: "select manager"
     }]).then(function(response){
       db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)",[response.first_name,response.last_name,response.role,response.employee], function (err){

@@ -4,7 +4,7 @@ VALUES  ( "Egineering"),
         ( "Legal" ),
         ( "Sales" );
 
-INSERT INTO role (department_id, title, salary)
+INSERT INTO  role (department_id, title, salary)
 VALUES  ( 004, "sales lead", 100000),
         ( 004, "salesperson", 80000),
         ( 001, "lead engineer", 150000),

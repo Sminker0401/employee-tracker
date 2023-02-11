@@ -38,10 +38,10 @@ function menu() {
     viewDepartment()
   }
   else if(response.option==="view roles") {
-    viewRoles()
+    viewRole()
   }
   else if(response.option==="view employees") {
-    viewEmployees()
+    viewEmployee()
   }
   else if(response.option==="add a department") {
     addDepartment()
@@ -59,8 +59,8 @@ function menu() {
 }
 
 function addEmployee() {
-  db.query("select title as name,id as value from role",function(err,rows){
-   db.query("select concat(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
+  db.query("select title as name,id as value from role",function(err, data){
+   db.query("select contact(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
 
     inquirer.prompt([{
       type: 'input',
@@ -92,7 +92,7 @@ function addEmployee() {
 
 
 function addRole() {
-  db.query("select name, id as value from department", function(err,rows){
+  db.query("select name, id as value from department", function(err,data){
 
  
   inquirer.prompt([{
@@ -129,22 +129,22 @@ function addDepartment() {
 }
 
 function viewEmployees() {
-  db.query("select * from employee", function(err,rows){
-    printTable(rows)
+  db.query("select * from employee", function(err, data){
+    printTable(data)
     menu()
   })
 }
 
-function viewRoles() {
-  db.query("select * from role", function(err, rows){
-    printTable(rows)
+function viewRole() {
+  db.query("select * from role", function(err, data){
+    printTable(data)
     menu()
   })
 }
 
 function viewDepartment() {  
-      db.query("select * from department", function(err,rows){
-        printTable(rows)
+      db.query("select * from department", function(err, data){
+        printTable(data)
         menu()
       })
 }

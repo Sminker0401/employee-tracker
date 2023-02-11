@@ -60,7 +60,7 @@ function menu() {
 
 function addEmployee() {
   db.query("select title as name,id as value from role",function(err, data){
-   db.query("select contact(first_name,' ',last_name) as name, id as value from employee", function(err,employeeData){
+   db.query("select contact(first_name,' ',last_name) as name, id as value from employee", function(err, employeedata){
 
     inquirer.prompt([{
       type: 'input',
@@ -78,11 +78,11 @@ function addEmployee() {
     },{
       type: 'list',
       name: 'employee',
-      choices: employeeData,
+      choices: employeedata,
       message: "select manager"
     }]).then(function(response){
       db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)",[response.first_name,response.last_name,response.role,response.employee], function (err){
-        viewEmployees()
+        viewEmployee()
       })
     })
    }) 
@@ -110,7 +110,7 @@ function addRole() {
     message: "choose the role department"
   }]).then(function(response){
     db.query("INSERT INTO role (title,salary,department_id) VALUES(?,?,?)",[response.role,response.salary,response.department],function(err){
-      viewRoles()
+      viewRole()
     })
   })
 })
@@ -128,7 +128,7 @@ function addDepartment() {
   })
 }
 
-function viewEmployees() {
+function viewEmployee() {
   db.query("select * from employee", function(err, data){
     printTable(data)
     menu()
